@@ -1,24 +1,63 @@
 import React, {useCallback, useRef} from 'react';
-import {Image, KeyboardAvoidingView, Platform, View, ScrollView, TextInput} from 'react-native';
+import {Image, KeyboardAvoidingView, Platform, View, ScrollView, TextInput, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {Form} from '@unform/mobile';
 import {FormHandles} from '@unform/core';
+import * as Yup from 'yup';
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 // import logoImg from '../../assets/logo.png';
 import Icon from 'react-native-vector-icons/Feather'
+import getValidationErrors from '../../util/getValidationErrors'
 
 import { Container, Title, ForgotPassword, ForgotPasswordText, CreateAccountButton, CreateAccountButtonText } from './styles';
+
+interface SignInFormData{
+  email: string;
+  password: string;
+}
 
 const SignIn: React.FC = () => {
   const navigation = useNavigation();
   const formRef = useRef<FormHandles>(null);
   const passwordInputRef = useRef<TextInput>();
 
-  const handleSubmit = useCallback((data: Object) => {
-    console.log(data)
-  },[])
+  const handleSubmit = useCallback(
+    async (data: SignInFormData) => {
+      try {
+        formRef.current?.setErrors({});
+        const schema = Yup.object().shape({
+          email: Yup.string()
+            .required('Required E-mail')
+            .email('Enter a valid email'),
+          password: Yup.string().required('Password required'),
+        });
+
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+
+        // await signIn({
+        //   email: data.email,
+        //   password: data.password,
+        // });
+
+        // history.push('/dashboard');
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          console.log(err);
+
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+          return;
+        }
+        Alert.alert('Oops!', 'Wrong user or password')
+
+      }
+    },
+    [],
+  );
 
   return (
     <>
