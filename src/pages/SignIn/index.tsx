@@ -10,6 +10,7 @@ import Button from '../../components/Button';
 // import logoImg from '../../assets/logo.png';
 import Icon from 'react-native-vector-icons/Feather'
 import getValidationErrors from '../../util/getValidationErrors'
+import {useAuth} from '../../hooks/Auth'
 
 import { Container, Title, ForgotPassword, ForgotPasswordText, CreateAccountButton, CreateAccountButtonText } from './styles';
 
@@ -22,6 +23,10 @@ const SignIn: React.FC = () => {
   const navigation = useNavigation();
   const formRef = useRef<FormHandles>(null);
   const passwordInputRef = useRef<TextInput>();
+
+  const {signIn, user} = useAuth();
+
+  console.log(user)
 
   const handleSubmit = useCallback(
     async (data: SignInFormData) => {
@@ -38,10 +43,10 @@ const SignIn: React.FC = () => {
           abortEarly: false,
         });
 
-        // await signIn({
-        //   email: data.email,
-        //   password: data.password,
-        // });
+        await signIn({
+          email: data.email,
+          password: data.password,
+        });
 
         // history.push('/dashboard');
       } catch (err) {
@@ -56,7 +61,7 @@ const SignIn: React.FC = () => {
 
       }
     },
-    [],
+    [signIn],
   );
 
   return (
